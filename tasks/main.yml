@@ -1,0 +1,19 @@
+---
+# tasks file for srv1c-role
+
+- name: Install other packages
+  include_tasks: install_other_pack.yml
+
+- name: Install RU locale
+  include_tasks: install_locale_ru.yml
+
+# Uncomment to remove old packages 1C versions <= 8.3.19.x
+#- name: Remove old server 1c
+#  include_tasks: remove_old_srv1c.yml
+
+- name: Install server 1c
+  include_tasks: install_srv1c.yml
+
+- name: Install ras
+  include_tasks: install_ras.yml
+#  when: ansible_nodename == "some-server"

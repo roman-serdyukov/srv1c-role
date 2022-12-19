@@ -1,0 +1,13 @@
+---
+# handlers file for srv1c
+
+- name: Restart server 1c
+  become: true
+  ansible.builtin.systemd: 
+    name: srv1cv8-{{ ver1c }}@default
+    state: restarted
+    daemon_reload: yes
+
+- name: Reboot server
+  become: true
+  reboot:

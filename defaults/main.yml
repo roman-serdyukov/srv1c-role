@@ -1,0 +1,9 @@
+---
+# defaults file for srv1c
+
+ver1c: 8.3.22.1709
+
+folder_distr: /home/{{ ansible_user }}
+
+other_packages:
+  - libenchant1c2a

@@ -1,0 +1,18 @@
+---
+# Install other packages for 1C server
+
+- name: Other packages | Update apt cache
+  become: true
+  ansible.builtin.apt: 
+    update_cache: yes 
+    cache_valid_time: 3600
+  ignore_errors: true
+  
+- name: Other packages | Install pakages
+  become: True
+  ansible.builtin.apt:
+    name: '{{ item }}'
+    state: latest
+  with_items:
+    - '{{ other_packages }}'
+  ignore_errors: true

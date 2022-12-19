@@ -1,0 +1,16 @@
+---
+# Remove old version 1c server < 8.3.20
+
+- name: Remove old server 1c | Remove 1c packages
+  become: true
+  ansible.builtin.command: apt -y remove 1c*
+
+- name: Remove old server 1c | Remove simbolic link
+  become: true
+  ansible.builtin.file:
+    path: /etc/init.d/srv1cv83
+    state: absent
+  notify: Reboot server
+
+- name: Remove old server 1c | Flush handlers
+  ansible.builtin.meta: flush_handlers

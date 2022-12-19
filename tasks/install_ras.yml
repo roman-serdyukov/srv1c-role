@@ -1,0 +1,22 @@
+---
+# Install ras
+
+- name: Install ras | Create simbolic link ras in systemd
+  become: true
+  ansible.builtin.command: systemctl link /opt/1cv8/x86_64/{{ ver1c }}/ras-{{ ver1c }}.service
+
+- name: Install ras | Start and enable service rassrv1cv8
+  become: true
+  ansible.builtin.systemd:
+    name: ras-{{ ver1c }}
+    state: started
+    enabled: yes
+
+- name: Install ras | Register service rassrv1cv8 status
+  become: true
+  ansible.builtin.command: systemctl status ras-{{ ver1c }}
+  register: results_rassrv1cv8
+
+- name: Install ras | View service rassrv1cv8 status
+  debug: 
+    var: results_rassrv1cv8

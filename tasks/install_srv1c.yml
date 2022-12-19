@@ -1,0 +1,42 @@
+---
+# Install server 1C
+
+- name: Install 1C server | Create folder distr in home  
+  ansible.builtin.file:
+    path: "{{ folder_distr }}/distr"
+    state: directory
+    mode: 0777  
+
+- name: Install 1C server | Copy 1C files
+  ansible.builtin.copy:
+    src: distr/. 
+    dest: "{{ folder_distr }}/distr" 
+    mode: 0777
+
+- name: Install 1C server | Install 1C files
+  become: true
+  ansible.builtin.command: /{{ folder_distr }}/distr/setup-full-{{ ver1c }}-x86_64.run --mode unattended --enable-components server,ws,server_admin
+
+- name: Install 1C server | Create simbolic link server 1C in systemd
+  become: true
+  ansible.builtin.command: systemctl link /opt/1cv8/x86_64/{{ ver1c }}/srv1cv8-{{ ver1c }}@.service
+
+- name: Install 1C server | Start service 1C
+  become: true
+  ansible.builtin.systemd:
+    name: srv1cv8-{{ ver1c }}@default
+    state: started
+    enabled: yes
+  notify: Restart server 1c
+
+- name: Install 1C server | Flush handlers
+  ansible.builtin.meta: flush_handlers
+
+- name: Install 1C server | Register server 1C status
+  become: true
+  ansible.builtin.command: systemctl status srv1cv8-{{ ver1c }}@default
+  register: results_1c_status
+
+- name: Install 1C server | View server 1C status
+  debug:
+    var: results_1c_status
