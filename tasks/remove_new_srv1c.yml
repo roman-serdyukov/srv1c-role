@@ -1,0 +1,38 @@
+---
+# Remove old version 1c server < 8.3.20
+
+- name: Remove new server 1c | Read 1c version
+  become: true
+  ansible.builtin.shell: ls /opt/1cv8/x86_64/
+  register: folder_list
+  ignore_errors: true
+
+- name: Remove new server 1c | Show version
+  debug:
+    var: folder_list.stdout
+
+- name: Remove new server 1c | Сhange target folder & start uninstaller
+  become: true
+  ansible.builtin.shell: cd /opt/1cv8/x86_64/{{ folder_list.stdout }} && ./uninstaller-full --mode unattended
+  when: ver1c != folder_list.stdout and folder_list.rc == 0
+
+- name: Remove new server 1c | Remove old links srv1cv8
+  become: true
+  ansible.builtin.shell: rm /etc/systemd/system/srv1cv8*
+  when: ver1c != folder_list.stdout and folder_list.rc == 0
+
+- name: Remove new server 1c | Stop and disable service rassrv1cv8
+  become: true
+  ansible.builtin.systemd:
+    name: ras-{{ folder_list.stdout }}
+    state: stopped
+    enabled: no
+  when: ver1c != folder_list.stdout and folder_list.rc == 0
+
+- name: Remove new server 1c | Remove old links ras
+  become: true
+  ansible.builtin.shell: rm /etc/systemd/system/ras-*
+  when: ver1c != folder_list.stdout and folder_list.rc == 0
+
+- name: Remove new server 1c | Flush handlers
+  ansible.builtin.meta: flush_handlers

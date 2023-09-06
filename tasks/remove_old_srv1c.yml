@@ -4,6 +4,8 @@
 - name: Remove old server 1c | Remove 1c packages
   become: true
   ansible.builtin.command: apt -y remove 1c*
+  ignore_errors: true
+  register: rm_old_srv
 
 - name: Remove old server 1c | Remove simbolic link
   become: true
@@ -11,6 +13,8 @@
     path: /etc/init.d/srv1cv83
     state: absent
   notify: Reboot server
+  when: rm_old_srv.rc == 0
 
 - name: Remove old server 1c | Flush handlers
   ansible.builtin.meta: flush_handlers
+  when: rm_old_srv.rc == 0

@@ -1,11 +1,22 @@
 ---
 # Install RU locale for 1C server
 
+- name: Change lacale on RU | Change system locale 
+  become: true
+  ansible.builtin.shell: locale | grep LANG=
+  register: sys_locale
+
+- name: Change lacale on RU | Show system locale 
+  debug:
+    var: sys_locale.stdout
+
 - name: Change lacale on RU | Ensure a locale exists
   become: true
   ansible.builtin.locale_gen:
     name: ru_RU.UTF-8
     state: present
+  when: sys_locale.stdout != 'LANG=ru_RU.UTF-8'
+#  when: "ru_RU.UTF-8 in sys_locale.stdout"
 
 - name: Change lacale on RU | Set default locale
   become: true
@@ -13,14 +24,17 @@
     dest: "/etc/default/locale"
     regexp: "^LANG="
     line: "LANG=ru_RU.UTF-8"
+  when: sys_locale.stdout != 'LANG=ru_RU.UTF-8'
 
 - name: Change lacale on RU | Reconfigure locales 
   become: true
   ansible.builtin.command: dpkg-reconfigure -f noninteractive locales
   notify: Reboot server
+  when: sys_locale.stdout != 'LANG=ru_RU.UTF-8'
      
 - name: Change lacale on RU | Flush handlers
   ansible.builtin.meta: flush_handlers
+  when: sys_locale.stdout != 'LANG=ru_RU.UTF-8'
 
 
 - name: Change lacale on RU | Wait for the machine to come back online
@@ -29,10 +43,12 @@
       sleep: 5
       delay: 5
       timeout: 300 
+  when: sys_locale.stdout != 'LANG=ru_RU.UTF-8'
 
 - name: Change lacale on RU | Check locale settings
   ansible.builtin.command: locale
   register: results_locale
 
-- debug:
+- name: Change lacale on RU | Show locale settings
+  debug:
     var: results_locale
