@@ -1,0 +1,25 @@
+# Install license tools (ring) for 1c
+
+- name: Install ring | Install java
+  become: True
+  ansible.builtin.apt:
+    name: openjdk-11-jdk
+    state: latest
+    update_cache: yes
+
+- name: Install ring | Install 1C ring
+  become: True
+  ansible.builtin.shell: /home/{{ ansible_user }}/distr/license-tools/1ce-installer-cli install --ignore-signature-warnings
+
+- name: Install ring | Add user in group grp1cv8
+  become: true
+  ansible.builtin.user:
+    name: '{{ ansible_user }}'
+    groups: grp1cv8
+    append: true
+
+
+- name: Install ring | Reboot server
+  become: True
+  ansible.builtin.reboot:
+    connect_timeout: 60

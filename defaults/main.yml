@@ -1,8 +1,7 @@
 ---
 # defaults file for srv1c
 
-# ver1c: 8.3.22.1709
-ver1c: 8.3.22.2175
+ver1c: 8.3.23.1865
 
 folder_distr: /home/{{ ansible_user }}
 

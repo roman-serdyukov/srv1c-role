@@ -19,4 +19,4 @@
 
 - name: Install ras | View service rassrv1cv8 status
   debug: 
-    var: results_rassrv1cv8
+    var: results_rassrv1cv8.stdout

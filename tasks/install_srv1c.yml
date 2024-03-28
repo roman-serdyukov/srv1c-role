@@ -15,7 +15,7 @@
 
 - name: Install 1C server | Install 1C files
   become: true
-  ansible.builtin.command: /{{ folder_distr }}/distr/setup-full-{{ ver1c }}-x86_64.run --mode unattended --enable-components server,ws,server_admin
+  ansible.builtin.command: /{{ folder_distr }}/distr/setup-full-{{ ver1c }}-x86_64.run --mode unattended --enable-components server,ws,server_admin,client_full,client_full
 
 - name: Install 1C server | Create simbolic link server 1C in systemd
   become: true
@@ -27,7 +27,7 @@
     name: srv1cv8-{{ ver1c }}@default
     state: started
     enabled: yes
-  notify: Restart server 1c
+  notify: Reboot server
 
 - name: Install 1C server | Flush handlers
   ansible.builtin.meta: flush_handlers
@@ -39,4 +39,4 @@
 
 - name: Install 1C server | View server 1C status
   debug:
-    var: results_1c_status
+    var: results_1c_status.stdout

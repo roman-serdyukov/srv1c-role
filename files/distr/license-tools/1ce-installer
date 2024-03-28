@@ -1,0 +1,78 @@
+#!/bin/sh
+
+# ----------------------------------------------------------------------------
+# Installer launcher
+#
+# Required environment variables:
+# JAVA_HOME - location of a Java installation directory.
+# Optional environment variables:
+# E1C_INSTALLER_OPTS - additional Java options
+# ----------------------------------------------------------------------------
+
+if [ -z "$JAVA_HOME" ]; then
+    INSTALLER_JAVA=`command -v java`
+    if [ ! -f "$INSTALLER_JAVA" ]; then
+        echo Error: JAVA_HOME environment variable is not set and Java is not found in PATH.
+        echo Please set the JAVA_HOME environment variable to the location of your Java installation.
+        exit 1
+    fi
+else
+    if [ ! -f "$JAVA_HOME"/bin/java ]; then
+        echo Error: $JAVA_HOME/bin/java not found.
+        echo Please set the JAVA_HOME environment variable to the location of your Java installation.
+        exit 1;
+    fi
+    INSTALLER_JAVA=$JAVA_HOME/bin/java
+fi
+
+# Java 9+ support
+JAVAVER=`"$INSTALLER_JAVA" -version 2>&1 | awk '/version/ {x = $3; gsub(/"/, "", x); split(x, y, "."); print y[1]}'`
+if [ "$JAVAVER" -ge "9" ]; then
+    JAVA9_OPTS="--add-opens java.base/java.lang=ALL-UNNAMED -Djavax.xml.bind.JAXBContextFactory=org.eclipse.persistence.jaxb.JAXBContextFactory"
+fi
+
+# Check whether we can use additional java options
+if [ -n "$E1C_INSTALLER_OPTS" ]; then
+    JAVA_ADD_OPTS="${JAVA_ADD_OPTS} ${E1C_INSTALLER_OPTS}"
+fi;
+
+if [ -z "$E1C_INSTALLER_LOGS" ]; then
+    export E1C_INSTALLER_LOGS=/tmp
+fi
+
+echo $JAVA_ADD_OPTS | grep -q :-HeapDumpOnOutOfMemoryError 2>&1
+if [ "$?" -ne "0" ]; then
+    echo $JAVA_ADD_OPTS | grep -q HeapDumpPath 2>&1
+    if [ "$?" -ne "0"  ]; then
+        # JAVA_ADD_OPTS does not contain neither -HeapDumpOnOutOfMemoryError nor HeapDumpPath
+        mkdir -p "/${E1C_INSTALLER_LOGS}/1ce-installer-crash"
+
+        DATE_TIME=$(date +'%Y%m%dT%H%M%S')
+        JAVA_ADD_OPTS="${JAVA_ADD_OPTS} -XX:HeapDumpPath=/${E1C_INSTALLER_LOGS}/1ce-installer-crash/oome-memory-dump-${DATE_TIME}.hprof"
+    fi
+fi
+
+echo $JAVA_ADD_OPTS | grep -q HeapDumpOnOutOfMemoryError 2>&1
+if [ "$?" -ne "0" ]; then
+    # E1C_INSTALLER_OPTS does not contain HeapDumpOnOutOfMemoryError
+    JAVA_ADD_OPTS=${JAVA_ADD_OPTS}" -XX:+HeapDumpOnOutOfMemoryError"
+fi
+
+echo $JAVA_ADD_OPTS | grep -q OnError 2>&1
+if [ "$?" -ne "0" ]; then
+    # JAVA_ADD_OPTS does not contain OnError
+    mkdir -p "/$E1C_INSTALLER_LOGS/1ce-installer-crash"
+
+    JAVA_ADD_OPTS="${JAVA_ADD_OPTS} -XX:ErrorFile=/${E1C_INSTALLER_LOGS}/1ce-installer-crash/fatal-error-%p.log"
+fi
+
+DIR="$(cd "$(dirname "$0")" && pwd)"
+if [ -z "$E1C_INSTALLER_SOURCE" ]; then
+    export E1C_INSTALLER_SOURCE="$DIR"
+fi;
+
+INSTALLER_MAIN="com._1c.installer.ui.fx.app.InstallerFxApp"
+
+INSTALLER_CLASSPATH="$DIR/lib/*"
+
+"$INSTALLER_JAVA" $JAVA9_OPTS $JAVA_ADD_OPTS -cp "$INSTALLER_CLASSPATH" $INSTALLER_MAIN "$@" &

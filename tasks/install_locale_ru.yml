@@ -16,7 +16,6 @@
     name: ru_RU.UTF-8
     state: present
   when: sys_locale.stdout != 'LANG=ru_RU.UTF-8'
-#  when: "ru_RU.UTF-8 in sys_locale.stdout"
 
 - name: Change lacale on RU | Set default locale
   become: true
@@ -38,7 +37,7 @@
 
 
 - name: Change lacale on RU | Wait for the machine to come back online
-  wait_for_connection:
+  ansible.builtin.wait_for_connection:
       connect_timeout: 60
       sleep: 5
       delay: 5

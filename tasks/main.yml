@@ -7,18 +7,22 @@
 - name: Install RU locale
   include_tasks: install_locale_ru.yml
 
-# Uncomment to remove old packages 1C versions <= 8.3.19.x
+# Uncomment to remove old packages 1C versions without *.run
 - name: Remove old server 1c
   include_tasks: remove_old_srv1c.yml
 
-# Uncomment to remove new packages 1C versions => 8.3.19.x
+# Uncomment to remove new packages 1C versions with *.run
 - name: Remove new server 1c
   include_tasks: remove_new_srv1c.yml
-#  ignore_errors: true
 
 - name: Install server 1c
   include_tasks: install_srv1c.yml
 
 - name: Install ras
   include_tasks: install_ras.yml
-#  when: ansible_nodename == "some-server"
+
+- name: Install ring
+  include_tasks: install_ring.yml
+
+# - name: Activating 1C license
+#   include_tasks: activate_lic.yml

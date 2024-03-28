@@ -11,8 +11,8 @@
 - name: Other packages | Install pakages
   become: True
   ansible.builtin.apt:
-    name: '{{ item }}'
+    name: "{{ item }}"
     state: latest
   with_items:
-    - '{{ other_packages }}'
+    - "{{ other_packages }}"
   ignore_errors: true

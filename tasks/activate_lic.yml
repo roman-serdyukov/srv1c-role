@@ -1,0 +1,17 @@
+# Task for activating 1C licenses
+
+- name: Remove old server 1c | Registering path to ring folder
+  ansible.builtin.shell: cd /opt/1C/1CE/components/1c-enterprise-ring* && pwd
+  register: ring_folder
+
+- name: Remove old server 1c | Show ring folder
+  debug: 
+    var: ring_folder.stdout
+
+- name: Activating 1C licenses | Server 1C lic x86-64
+  ansible.builtin.command: '{{ ring_folder.stdout }}/ring license activate --first-name <имя> --middle-name <отчество> --last-name <фамилия> [--email <email>] --company <компания> --country <страна> --zip-code <индекс> [--region <область> --district <район>] --town <город> --street <улица> --house <дом> --building <строение> --apartment <квартира> --serial <серийныйНомер> --pin <пинкод> [--previous-pin <предыдущийПинкод>]'
+  register: output_ring
+
+- name: Activating licenses | Show output
+  debug:
+    var: output_ring.stdout

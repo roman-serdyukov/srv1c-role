@@ -18,7 +18,7 @@
 
 - name: Remove new server 1c | Remove old links srv1cv8
   become: true
-  ansible.builtin.shell: rm /etc/systemd/system/srv1cv8*
+  ansible.builtin.shell: rm /etc/systemd/system/srv1cv8-*
   when: ver1c != folder_list.stdout and folder_list.rc == 0
 
 - name: Remove new server 1c | Stop and disable service rassrv1cv8
@@ -28,11 +28,13 @@
     state: stopped
     enabled: no
   when: ver1c != folder_list.stdout and folder_list.rc == 0
+  ignore_errors: true
 
 - name: Remove new server 1c | Remove old links ras
   become: true
   ansible.builtin.shell: rm /etc/systemd/system/ras-*
   when: ver1c != folder_list.stdout and folder_list.rc == 0
+  ignore_errors: true
 
 - name: Remove new server 1c | Flush handlers
   ansible.builtin.meta: flush_handlers

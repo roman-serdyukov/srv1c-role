@@ -10,4 +10,4 @@
 
 - name: Reboot server
   become: true
-  reboot:
+  ansible.builtin.reboot:
